@@ -1,0 +1,125 @@
+// ==========================================================================\
+// 🧠 實時天氣穿搭預報站 - 核心邏輯大腦
+// ==========================================================================\
+
+const API_KEY = "39db3c2e48a36fcbe02c225c230fe61c";
+
+document.addEventListener('DOMContentLoaded', () => {
+    const searchBtn = document.getElementById('searchBtn');
+    const cityInput = document.getElementById('cityInput');
+
+    // 監聽按鈕點擊事件
+    searchBtn.addEventListener('click', fetchWeather);
+
+    // 讓使用者按 Enter 鍵也能直接查詢
+    cityInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') fetchWeather();
+    });
+});
+
+async function fetchWeather() {
+    const cityInput = document.getElementById('cityInput');
+    const messageDiv = document.getElementById('message');
+    const weatherResult = document.getElementById('weatherResult');
+    
+    const cityName = cityInput.value.trim();
+
+    // 防呆機制：如果沒輸入字就點查詢
+    if (!cityName) {
+        showMessage("請先輸入城市英文名稱喔！");
+        return;
+    }
+
+    // 顯示載入狀態
+    showMessage("正在向氣象伺服器連線中...");
+    weatherResult.style.display = 'none';
+
+    // 建立 OpenWeatherMap API 的完整請求 URL (並強制設定回傳攝氏溫度 metric)
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric&lang=zh_tw`;
+
+    try {
+        const response = await fetch(url);
+        
+        // 如果城市名稱拼錯，API 會回傳 404
+        if (response.status === 404) {
+            throw new Error("找不到該城市，請檢查英文拼音是否正確（例如: Taipei）。");
+        } else if (!response.ok) {
+            throw new Error("伺服器連線失敗，或者 API Key 尚未生效（剛申請通常需等待 30-60 分鐘）。");
+        }
+
+        const data = await response.json();
+        
+        // 隱藏提示訊息，顯示結果區塊
+        messageDiv.style.display = 'none';
+        weatherResult.style.display = 'block';
+
+        // 解析 JSON 資料並渲染至 HTML 畫面
+        document.getElementById('cityName').textContent = `${data.name}, ${data.sys.country}`;
+        document.getElementById('temperature').textContent = `${Math.round(data.main.temp)} °C`;
+        document.getElementById('weatherDesc').textContent = data.weather[0].description;
+        document.getElementById('humidity').textContent = `濕度: ${data.main.humidity}%`;
+
+        // 動態更換天氣大 Emoji Icon
+        const weatherMain = data.weather[0].main;
+        setWeatherIcon(weatherMain);
+
+        // 🧠 執行穿搭推薦演算法
+        generateOutfitRecommendation(data.main.temp, weatherMain);
+
+    } catch (error) {
+        console.error(error);
+        showMessage(error.message);
+    }
+}
+
+// 顯示訊息的輔助函式
+function showMessage(text) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = text;
+    messageDiv.style.display = 'block';
+}
+
+// 依據天氣狀態給予對應的 Emoji
+function setWeatherIcon(status) {
+    const iconSpan = document.getElementById('weatherIcon');
+    const icons = {
+        Clear: "☀️",
+        Clouds: "☁️",
+        Rain: "🌧️",
+        Drizzle: "🌧️",
+        Thunderstorm: "⛈️",
+        Snow: "❄️",
+        Mist: "🌫️",
+        Haze: "🌫️"
+    };
+    iconSpan.textContent = icons[status] || "🌈";
+}
+
+// 🧥 核心資工邏輯：穿搭推薦判斷演算法
+function generateOutfitRecommendation(temp, status) {
+    const outfitBox = document.getElementById('outfitRecommendation');
+    let advice = "";
+
+    // 1. 依據溫度做大範圍切分
+    if (temp < 15) {
+        advice = "🌡️ 氣溫寒冷！建議穿著【羽絨外套 or 厚大衣】，內層搭配【發熱衣與毛衣】。出門記得戴上圍巾，注意保暖防風！";
+    } else if (temp >= 15 && temp < 20) {
+        advice = "🌡️ 天氣偏涼。適合【針織衫 or 大學T】，外加一件【風衣 or 牛仔外套】。洋蔥式穿法最保險，熱了方便脫。";
+    } else if (temp >= 20 && temp < 26) {
+        advice = "🌡️ 溫度舒適宜人。穿舒適的【長袖襯衫、薄帽T or 長袖T-shirt】，搭配一般長褲即可，是個適合展現穿搭的好天氣！";
+    } else {
+        advice = "🌡️ 氣溫炎熱！穿清爽的【短袖 T-shirt or 背心】，材質選擇透氣排汗的。注意防曬，記得多喝水防止中暑喔！";
+    }
+
+    // 2. 依據天氣型態疊加額外提醒
+    if (status === "Rain" || status === "Drizzle" || status === "Thunderstorm") {
+        advice += "<br><br>⚠️ <b>降雨警報：</b>外面正在下雨，出門記得攜帶【雨具 ☔】，鞋子建議穿著防潑水款式，避免弄濕不舒服。";
+    } else if (status === "Snow") {
+        advice += "<br><br>⚠️ <b>積雪警報：</b>外面正在下雪，請務必穿著【防滑雪靴】，走路注意安全防止滑倒！";
+    } else if (status === "Clear" && temp > 28) {
+        advice += "<br><br>☀️ <b>抗陽警報：</b>陽光強烈，出門可以配戴【墨鏡 or 帽子 🧢】，並塗抹防曬乳。";
+    }
+
+    // 將判斷完的結果灌入 HTML
+    outfitBox.innerHTML = advice;
+}
