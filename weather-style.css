@@ -1,187 +1,136 @@
-/* ==========================================================================\
-   🎨 實時天氣穿搭預報站 - 高質感深色系樣式表
-========================================================================== */
+// ==========================================================================\
+// 🧠 實時天氣穿搭預報站 - 核心邏輯大腦（動態變色完美版）
+// ==========================================================================\
 
-/* 全域重設與字體 */
-* {
-    margin: 0;
-    padding: 0;
-    box-box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
+const API_KEY = "39db3c2e48a36fcbe02c225c230fe61c";
 
-body {
-    background-color: #121214;
-    color: #e2e8f0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const searchBtn = document.getElementById('searchBtn');
+    const cityInput = document.getElementById('cityInput');
 
-/* 主儀表板卡片 */
-.dashboard-container {
-    background: #1e1e24;
-    border: 1px solid #2d2d34;
-    border-radius: 16px;
-    padding: 30px;
-    width: 100%;
-    max-width: 480px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    transition: all 0.3s ease;
-}
+    // 監聽按鈕點擊事件
+    searchBtn.addEventListener('click', fetchWeather);
 
-h1 {
-    font-size: 1.6rem;
-    margin-bottom: 25px;
-    color: #ffffff;
-    font-weight: 700;
-}
+    // 讓使用者按 Enter 鍵也能直接查詢
+    cityInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') fetchWeather();
+    });
+});
 
-/* 搜尋區塊 */
-.search-box {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
+async function fetchWeather() {
+    const cityInput = document.getElementById('cityInput');
+    const messageDiv = document.getElementById('message');
+    const weatherResult = document.getElementById('weatherResult');
+    
+    const cityName = cityInput.value.trim();
 
-#cityInput {
-    flex: 1;
-    background: #121214;
-    border: 1px solid #3e3e4a;
-    border-radius: 8px;
-    padding: 12px 16px;
-    color: #ffffff;
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-#cityInput:focus {
-    border-color: #007bff;
-}
-
-#searchBtn {
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0 20px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-#searchBtn:hover {
-    background: #0056b3;
-}
-
-/* 提示訊息區 */
-.message-info {
-    background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.3);
-    color: #ffc107;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
-}
-
-/* 天氣結果顯示區 */
-.weather-result {
-    background: #25252d;
-    border-radius: 12px;
-    padding: 20px;
-    margin-top: 15px;
-    animation: fadeIn 0.4s ease-out;
-}
-
-#cityName {
-    font-size: 1.3rem;
-    color: #ffffff;
-    margin-bottom: 10px;
-}
-
-.weather-main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin: 15px 0;
-}
-
-#weatherDesc {
-    font-size: 1.1rem;
-    color: #a0aec0;
-    text-transform: capitalize;
-    margin-bottom: 5px;
-}
-
-#humidity {
-    font-size: 0.9rem;
-    color: #718096;
-}
-
-/* 👕 穿搭推薦盒 */
-.outfit-section {
-    text-align: left;
-    margin-top: 20px;
-}
-
-.outfit-section h3 {
-    font-size: 1.1rem;
-    color: #ffffff;
-    margin-bottom: 12px;
-}
-
-.outfit-box {
-    background: #25252d;
-    border-left: 4px solid #007bff;
-    border-radius: 0 12px 12px 0;
-    padding: 15px;
-    color: #cbd5e0;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    min-height: 60px;
-}
-
-/* 卡片進場動畫 */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
+    // 防呆機制：如果沒輸入字就點查詢
+    if (!cityName) {
+        showMessage("請先輸入城市英文名稱喔！");
+        return;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+
+    // 顯示載入狀態
+    showMessage("正在向氣象伺服器連線中...");
+    weatherResult.style.display = 'none';
+
+    // 建立 OpenWeatherMap API 的完整請求 URL
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric&lang=zh_tw`;
+
+    try {
+        const response = await fetch(url);
+        
+        // 錯誤處理
+        if (response.status === 404) {
+            throw new Error("找不到該城市，請檢查英文拼音是否正確（例如: Taipei）。");
+        } else if (!response.ok) {
+            throw new Error("伺服器連線失敗，或者 API Key 尚未生效（剛申請通常需等待 30-60 分鐘）。");
+        }
+
+        const data = await response.json();
+        
+        // 隱藏提示訊息，顯示結果區塊
+        messageDiv.style.display = 'none';
+        weatherResult.style.display = 'block';
+
+        // 解析 JSON 資料並渲染至 HTML 畫面
+        document.getElementById('cityName').textContent = `${data.name}, ${data.sys.country}`;
+        document.getElementById('temperature').textContent = `${Math.round(data.main.temp)} °C`;
+        document.getElementById('weatherDesc').textContent = data.weather[0].description;
+        document.getElementById('humidity').textContent = `濕度: ${data.main.humidity}%`;
+
+        // 動態更換天氣大 Emoji Icon
+        const weatherMain = data.weather[0].main;
+        setWeatherIcon(weatherMain);
+
+        // 🧠 執行穿搭推薦與動態變色演算法
+        generateOutfitRecommendation(data.main.temp, weatherMain);
+
+    } catch (error) {
+        console.error(error);
+        showMessage(error.message);
     }
 }
-/* ==========================================================================\
-   🌡️ 動態天氣背景漸層 (由 JavaScript 控制切換)
-========================================================================== */
 
-/* 炎熱天氣 (大於 28 度) - 溫暖活力漸層 */
-body.hot-theme {
-    background: linear-gradient(135deg, #1e1212 0%, #2d1a15 100%);
-}
-body.hot-theme .dashboard-container {
-    border-color: rgba(255, 107, 107, 0.2);
-    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.1);
+// 顯示訊息的輔助函式
+function showMessage(text) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = text;
+    messageDiv.style.display = 'block';
 }
 
-/* 舒適/偏涼天氣 (15 ~ 28 度) - 質感科技藍綠漸層 */
-body.comfortable-theme {
-    background: linear-gradient(135deg, #121a24 0%, #102a3a 100%);
-}
-body.comfortable-theme .dashboard-container {
-    border-color: rgba(0, 123, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 123, 255, 0.1);
+// 依據天氣狀態給予對應的 Emoji
+function setWeatherIcon(status) {
+    const iconSpan = document.getElementById('weatherIcon');
+    const icons = {
+        Clear: "☀️",
+        Clouds: "☁️",
+        Rain: "🌧️",
+        Drizzle: "🌧️",
+        Thunderstorm: "⛈️",
+        Snow: "❄️",
+        Mist: "🌫️",
+        Haze: "🌫️"
+    };
+    iconSpan.textContent = icons[status] || "🌈";
 }
 
-/* 寒冷或下雨天 (小於 15 度 或 雨天) - 深邃迷霧灰藍 */
-body.cold-theme {
-    background: linear-gradient(135deg, #141416 0%, #1a202c 100%);
+// 🧥 核心資工邏輯：穿搭推薦判斷演算法 (加上動態變色功能)
+function generateOutfitRecommendation(temp, status) {
+    const outfitBox = document.getElementById('outfitRecommendation');
+    const body = document.body;
+    let advice = "";
+
+    // 🌟 每次查詢前，先清除舊的背景主題
+    body.classList.remove('hot-theme', 'comfortable-theme', 'cold-theme');
+
+    // 🌟 依據溫度/天氣，動態為 body 加上對應的 CSS 樣式
+    if (status === "Rain" || status === "Thunderstorm" || temp < 15) {
+        body.classList.add('cold-theme'); // 下雨或冷天變灰藍色調
+    } else if (temp >= 15 && temp <= 28) {
+        body.classList.add('comfortable-theme'); // 舒服天氣變科技深藍
+    } else if (temp > 28) {
+        body.classList.add('hot-theme'); // 像胡志明市 34 度這種暴熱天，變高級的帶紅暖調
+    }
+
+    // ------------- 穿搭 logic 判斷 -------------
+    if (temp < 15) {
+        advice = "🌡️ 氣溫寒冷！建議穿著【羽絨外套 or 厚大衣】，內層搭配【發熱衣與毛衣】。出門記得戴上圍巾，注意保暖防風！";
+    } else if (temp >= 15 && temp < 20) {
+        advice = "🌡️ 天氣偏涼。適合【針織衫 or 大學T】，外加一件【風衣 or 牛仔外套】。洋蔥式穿法最保險，熱了方便脫。";
+    } else if (temp >= 20 && temp < 26) {
+        advice = "🌡️ 溫度舒適宜人。穿舒適的【長袖襯衫、薄帽T or 長袖T-shirt】，搭配一般長褲即可，是個適合展現穿搭的好天氣！";
+    } else {
+        advice = "🌡️ 氣溫炎熱！穿清爽的【短袖 T-shirt or 背心】，材質選擇透氣排汗的。注意防曬，記得多喝水防止中暑喔！";
+    }
+
+    if (status === "Rain" || status === "Drizzle" || status === "Thunderstorm") {
+        advice += "<br><br>⚠️ <b>降雨警報：</b>外面正在下雨，出門記得攜帶【雨具 ☔】，鞋子建議穿著防潑水款式，避免弄濕不舒服。";
+    } else if (status === "Snow") {
+        advice += "<br><br>⚠️ <b>積雪警報：</b>外面正在下雪，請務必穿著【防滑雪靴】，走路注意安全防止滑倒！";
+    } else if (status === "Clear" && temp > 28) {
+        advice += "<br><br>☀️ <b>抗陽警報：</b>陽光強烈，出門可以配戴【墨鏡 or 帽子 🧢】，並塗抹防曬乳。";
+    }
+
+    outfitBox.innerHTML = advice;
 }
