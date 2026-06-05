@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌦️ 實時天氣穿搭預報站</title>
+    <link rel="stylesheet" href="weather-style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>🌦️ 實時天氣穿搭預報站</h1>
+        
+        <div class="search-box">
+            <input type="text" id="cityInput" placeholder="輸入城市英文名稱 (例如: Taipei, Tokyo)...">
+            <button id="searchBtn">查詢天氣</button>
+        </div>
+
+        <div id="message" class="message-info" style="display: none;"></div>
+
+        <div id="weatherResult" class="weather-result" style="display: none;">
+            <h2 id="cityName">城市名稱</h2>
+            <div class="weather-main">
+                <span id="weatherIcon" style="font-size: 3rem;">☀️</span>
+                <span id="temperature" style="font-size: 2.5rem; font-weight: bold;">-- °C</span>
+            </div>
+            <p id="weatherDesc">天氣狀況描述</p>
+            <p id="humidity">濕度: --%</p>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <div class="outfit-section">
+            <h3>🧥 今日穿搭小建議</h3>
+            <div id="outfitRecommendation" class="outfit-box">
+                請先在上方輸入城市並點擊查詢，獲取專屬穿搭指南！
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="index.html" style="color: #007bff; text-decoration: none; font-size: 0.9rem;">← 返回個人作品集</a>
+        </div>
+    </div>
+
+    <script src="weather-script.js"></script>
+</body>
+</html>
