@@ -159,3 +159,29 @@ h1 {
         transform: translateY(0);
     }
 }
+/* ==========================================================================\
+   🌡️ 動態天氣背景漸層 (由 JavaScript 控制切換)
+========================================================================== */
+
+/* 炎熱天氣 (大於 28 度) - 溫暖活力漸層 */
+body.hot-theme {
+    background: linear-gradient(135deg, #1e1212 0%, #2d1a15 100%);
+}
+body.hot-theme .dashboard-container {
+    border-color: rgba(255, 107, 107, 0.2);
+    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.1);
+}
+
+/* 舒適/偏涼天氣 (15 ~ 28 度) - 質感科技藍綠漸層 */
+body.comfortable-theme {
+    background: linear-gradient(135deg, #121a24 0%, #102a3a 100%);
+}
+body.comfortable-theme .dashboard-container {
+    border-color: rgba(0, 123, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 123, 255, 0.1);
+}
+
+/* 寒冷或下雨天 (小於 15 度 或 雨天) - 深邃迷霧灰藍 */
+body.cold-theme {
+    background: linear-gradient(135deg, #141416 0%, #1a202c 100%);
+}
