@@ -7,27 +7,35 @@
     <link rel="stylesheet" href="./weather-style.css">
 </head>
 <body>
-    <div class="dashboard-container">
-        <h1>🌦️ 實時天氣穿搭預報站</h1>
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <p class="eyebrow">WEATHER · OUTFIT GUIDE</p>
+            <h1>實時天氣穿搭預報站</h1>
+            <p class="dashboard-intro">掌握當下天氣，穿得剛剛好。</p>
+        </header>
         
-        <div class="search-box">
-            <input type="text" id="cityInput" placeholder="輸入城市英文名稱 (例如: Taipei, Tokyo)...">
-            <button id="searchBtn">查詢天氣</button>
+        <div class="search-box" role="search">
+            <label class="sr-only" for="cityInput">城市英文名稱</label>
+            <input type="text" id="cityInput" placeholder="輸入城市英文名稱（如 Taipei）" autocomplete="off">
+            <button id="searchBtn" type="button">查詢天氣 <span aria-hidden="true">→</span></button>
         </div>
 
-        <div id="message" class="message-info" style="display: none;"></div>
+        <div id="message" class="message-info" role="status" aria-live="polite" style="display: none;"></div>
 
         <div id="weatherResult" class="weather-result" style="display: none;">
-            <h2 id="cityName">城市名稱</h2>
+            <div class="weather-result__topline">
+                <p class="result-label">目前天氣</p>
+                <p id="cityName">城市名稱</p>
+            </div>
             <div class="weather-main">
-                <span id="weatherIcon" style="font-size: 3rem;">☀️</span>
-                <span id="temperature" style="font-size: 2.5rem; font-weight: bold;">-- °C</span>
+                <span id="weatherIcon" aria-hidden="true">☀️</span>
+                <span id="temperature">-- °C</span>
             </div>
             <p id="weatherDesc">天氣狀況描述</p>
             <p id="humidity">濕度: --%</p>
         </div>
 
-        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+        <hr class="section-divider">
 
         <div class="outfit-section">
             <h3>🧥 今日穿搭小建議</h3>
@@ -35,7 +43,7 @@
                 請先在上方輸入城市並點擊查詢，獲取專屬穿搭指南！
             </div>
         </div>
-    </div>
+    </main>
 
     <script src="./weather-script.js"></script>
 </body>

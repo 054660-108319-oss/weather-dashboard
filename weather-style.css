@@ -1,151 +1,230 @@
 /* ==========================================================================\
-   🎨 實時天氣穿搭預報站 - 核心外觀皮膚 (高級暗黑風)
+   🎨 實時天氣穿搭預報站 — 玻璃擬態、行動優先介面
 ========================================================================== */
 
-/* 全域重設 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+:root {
+    color-scheme: dark;
+    --bg-start: #071329;
+    --bg-end: #172b51;
+    --accent: #73d7ff;
+    --accent-strong: #5274ff;
+    --accent-soft: rgba(115, 215, 255, 0.22);
+    --text-primary: #f7fbff;
+    --text-secondary: #c2d1e8;
+    --text-muted: #91a4c2;
+    --surface: rgba(12, 27, 53, 0.66);
+    --surface-strong: rgba(18, 40, 75, 0.78);
+    --border: rgba(213, 237, 255, 0.17);
+    --shadow: 0 24px 70px rgba(1, 10, 28, 0.45);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* 預設背景：極簡硬派黑底 */
+* { box-sizing: border-box; }
+
 body {
-    background-color: #0b0f19;
-    color: #f3f4f6;
+    min-width: 320px;
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    transition: background 0.5s ease; /* 讓變色時有平滑漸層效果 */
+    margin: 0;
+    display: grid;
+    place-items: center;
+    overflow-x: hidden;
+    padding: clamp(1rem, 4vw, 3rem);
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+    transition: background 500ms ease;
 }
 
-/* ==========================================================================\
-   🌡️ 動態天氣背景漸層 (由 JavaScript 控制切換)
-========================================================================== */
+body::before,
+body::after {
+    position: fixed;
+    z-index: -1;
+    width: min(72vw, 44rem);
+    aspect-ratio: 1;
+    content: "";
+    pointer-events: none;
+    border-radius: 50%;
+    filter: blur(8px);
+    opacity: 0.65;
+    transition: background 500ms ease, transform 500ms ease;
+}
+
+body::before {
+    top: -22rem;
+    left: -18rem;
+    background: radial-gradient(circle, rgba(112, 216, 255, 0.35), transparent 67%);
+}
+
+body::after {
+    right: -20rem;
+    bottom: -23rem;
+    background: radial-gradient(circle, rgba(111, 109, 255, 0.31), transparent 67%);
+}
+
 body.hot-theme {
-    background: linear-gradient(135deg, #1e1212 0%, #2d1a15 100%);
+    --bg-start: #241329;
+    --bg-end: #633021;
+    --accent: #ffd16e;
+    --accent-strong: #fb7061;
+    --accent-soft: rgba(255, 171, 102, 0.23);
 }
-body.hot-theme .dashboard-container {
-    border-color: rgba(255, 107, 107, 0.2);
-    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.1);
-}
+
+body.hot-theme::before { background: radial-gradient(circle, rgba(255, 205, 104, 0.38), transparent 67%); }
+body.hot-theme::after { background: radial-gradient(circle, rgba(251, 112, 97, 0.34), transparent 67%); }
 
 body.comfortable-theme {
-    background: linear-gradient(135deg, #121a24 0%, #102a3a 100%);
-}
-body.comfortable-theme .dashboard-container {
-    border-color: rgba(0, 123, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 123, 255, 0.1);
+    --bg-start: #071d32;
+    --bg-end: #1b3d61;
+    --accent: #78e5d2;
+    --accent-strong: #5589ff;
+    --accent-soft: rgba(120, 229, 210, 0.19);
 }
 
 body.cold-theme {
-    background: linear-gradient(135deg, #141416 0%, #1a202c 100%);
+    --bg-start: #11182d;
+    --bg-end: #263459;
+    --accent: #b7d5ff;
+    --accent-strong: #7b93ed;
+    --accent-soft: rgba(183, 213, 255, 0.2);
 }
 
-/* 主儀表板卡片 */
 .dashboard-container {
-    background-color: #111827;
-    border: 1px solid #1f2937;
-    border-radius: 16px;
-    padding: 30px;
-    width: 100%;
-    max-width: 500px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    text-align: center;
+    width: min(100%, 38rem);
+    padding: clamp(1.5rem, 5vw, 3rem);
+    border: 1px solid var(--border);
+    border-radius: clamp(1.5rem, 4vw, 2rem);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.045)), var(--surface);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.13);
+    backdrop-filter: blur(24px) saturate(135%);
+    -webkit-backdrop-filter: blur(24px) saturate(135%);
 }
 
-h1, h3 {
-    margin-bottom: 20px;
-    font-weight: 600;
+.dashboard-header { text-align: center; }
+
+.eyebrow,
+.result-label {
+    margin: 0;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.14em;
 }
 
-/* 搜尋區塊 */
+h1, h3, p { margin-top: 0; }
+
+h1 {
+    margin-bottom: 0.55rem;
+    font-size: clamp(1.8rem, 7vw, 2.7rem);
+    line-height: 1.16;
+    letter-spacing: -0.05em;
+}
+
+.dashboard-intro {
+    margin-bottom: clamp(1.5rem, 5vw, 2.25rem);
+    color: var(--text-secondary);
+    font-size: clamp(0.94rem, 3vw, 1.05rem);
+}
+
 .search-box {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 0.7rem;
 }
 
 input[type="text"] {
-    flex: 1;
-    background-color: #1f2937;
-    border: 1px solid #374151;
-    color: #fff;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 1rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
     outline: none;
+    color: var(--text-primary);
+    background: rgba(3, 14, 34, 0.4);
+    font: inherit;
+    transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
-input[type="text"]:focus {
-    border-color: #3b82f6;
+input[type="text"]::placeholder { color: var(--text-muted); }
+
+input[type="text"]:focus-visible {
+    border-color: var(--accent);
+    background: rgba(3, 14, 34, 0.58);
+    box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 button {
-    background-color: #2563eb;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 1rem;
+    flex: 0 0 auto;
+    padding: 0.9rem 1.05rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 0.9rem;
+    color: #06152a;
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    box-shadow: 0 0.7rem 1.4rem var(--accent-soft);
     cursor: pointer;
-    font-weight: 500;
-    transition: background 0.2s;
+    font: inherit;
+    font-weight: 800;
+    white-space: nowrap;
+    transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
 
-button:hover {
-    background-color: #1d4ed8;
-}
+button:hover { transform: translateY(-2px); box-shadow: 0 0.95rem 1.8rem var(--accent-soft); filter: brightness(1.07); }
+button:active { transform: translateY(0); }
+button:focus-visible { outline: 3px solid var(--text-primary); outline-offset: 3px; }
 
-/* 訊息與結果 */
 .message-info {
-    color: #9ca3af;
-    margin: 15px 0;
-    font-size: 0.95rem;
+    margin: 1rem 0 0;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid rgba(255, 210, 111, 0.3);
+    border-radius: 0.8rem;
+    color: #ffe1a3;
+    background: rgba(104, 67, 18, 0.22);
+    font-size: 0.92rem;
+    line-height: 1.5;
 }
 
 .weather-result {
-    background-color: #1f2937;
-    border-radius: 12px;
-    padding: 20px;
-    margin-top: 20px;
+    margin-top: 1.25rem;
+    padding: clamp(1.25rem, 4vw, 1.75rem);
+    border: 1px solid var(--border);
+    border-radius: 1.25rem;
+    background: var(--surface-strong);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: reveal 420ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
-.weather-main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin: 15px 0;
-}
+.weather-result__topline { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.weather-result__topline #cityName { margin: 0; color: var(--text-secondary); font-size: 0.92rem; text-align: right; }
 
-#weatherDesc {
-    font-size: 1.1rem;
-    color: #cbd5e1;
-    text-transform: capitalize;
-    margin-bottom: 5px;
-}
+.weather-main { display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 0.8rem 0; }
+#weatherIcon { font-size: clamp(3rem, 12vw, 4.6rem); filter: drop-shadow(0 0.55rem 0.7rem rgba(0, 0, 0, 0.2)); }
+#temperature { font-size: clamp(2.9rem, 13vw, 4.5rem); font-weight: 800; letter-spacing: -0.075em; line-height: 1; }
+#weatherDesc { margin-bottom: 0.35rem; color: var(--text-secondary); text-align: center; text-transform: capitalize; }
+#humidity { margin: 0; color: var(--text-muted); font-size: 0.9rem; text-align: center; }
 
-#humidity {
-    font-size: 0.9rem;
-    color: #9ca3af;
-}
-
-/* 穿搭區塊 */
-.outfit-section {
-    margin-top: 20px;
-    text-align: left;
-}
+.section-divider { height: 1px; margin: clamp(1.5rem, 5vw, 2.25rem) 0; border: 0; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+.outfit-section { text-align: left; }
+.outfit-section h3 { margin-bottom: 0.75rem; font-size: clamp(1.08rem, 4vw, 1.3rem); letter-spacing: -0.025em; }
 
 .outfit-box {
-    background-color: #1f2937;
-    border-left: 4px solid #10b981;
-    padding: 15px;
-    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0.85rem;
+    color: var(--text-secondary);
+    background: rgba(7, 21, 45, 0.33);
     font-size: 0.95rem;
-    line-height: 1.6;
-    color: #e5e7eb;
+    line-height: 1.75;
+}
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@keyframes reveal { from { opacity: 0; transform: translateY(0.5rem); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 34rem) {
+    .search-box { flex-direction: column; }
+    button { width: 100%; }
+    .weather-result__topline { align-items: flex-start; flex-direction: column; gap: 0.35rem; }
+    .weather-result__topline #cityName { text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
